@@ -1,0 +1,30 @@
+.board-wrapper {
+  padding: 24px;
+  min-height: 100vh;
+}
+
+.board {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.add-card-btn {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 32px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+}
+
+.add-card-btn:hover {
+  background: #4338ca;
+}

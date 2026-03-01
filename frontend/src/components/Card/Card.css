@@ -1,0 +1,193 @@
+.card {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card.dragging {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Header row ── */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drag-handle {
+  cursor: grab;
+  color: #94a3b8;
+  font-size: 18px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.drag-handle:active { cursor: grabbing; }
+
+.card-checkbox {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  color: #64748b;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.card-title {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.card-title.done {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.card-title-input {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 2px 6px;
+  outline: none;
+}
+
+/* ── Three-dot menu ── */
+.menu-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #64748b;
+  line-height: 1;
+  padding: 0 4px;
+}
+
+.menu-btn:hover { color: #1e293b; }
+
+.menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  z-index: 10;
+  min-width: 150px;
+}
+
+.menu-dropdown li {
+  padding: 8px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #334155;
+}
+
+.menu-dropdown li:hover { background: #f1f5f9; }
+
+/* ── Body (desc + deadline) ── */
+.card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 8px;
+}
+
+.card-desc {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+.card-deadline {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.card-desc-input {
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 4px 6px;
+  resize: vertical;
+  min-height: 48px;
+  outline: none;
+  font-family: inherit;
+}
+
+.card-deadline-input {
+  font-size: 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 4px 6px;
+  outline: none;
+  width: fit-content;
+}
+
+.save-btn {
+  align-self: flex-end;
+  padding: 6px 16px;
+  background: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.save-btn:hover { background: #4338ca; }
+
+/* ── Nested sub-tasks ── */
+.subtasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 28px;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 10px;
+}
+
+.subsubtasks {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 20px;
+  border-left: 2px solid #e2e8f0;
+  padding-left: 10px;
+}
+
+.sub-card {
+  background: #f8fafc;
+  border-radius: 6px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

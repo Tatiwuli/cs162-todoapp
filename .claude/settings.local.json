@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"Rename-Item ''C:\\\\Users\\\\innyw\\\\Downloads\\\\cs162-todoapp\\\\frontend\\\\src\\\\index.js'' ''index.jsx''; Rename-Item ''C:\\\\Users\\\\innyw\\\\Downloads\\\\cs162-todoapp\\\\frontend\\\\src\\\\App.js'' ''App.jsx''\")"
+    ]
+  }
+}
