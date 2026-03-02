@@ -14,4 +14,11 @@ def create_app():
 
     init_db(app)
 
+    from app.routes.tasks import tasks_bp
+    from app.routes.subtasks import subtasks_bp
+    from app.routes.subsubtasks import subsubtasks_bp
+    app.register_blueprint(tasks_bp)
+    app.register_blueprint(subtasks_bp)
+    app.register_blueprint(subsubtasks_bp)
+
     return app

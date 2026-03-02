@@ -20,7 +20,6 @@ def init_db(app):
     with app.app_context():
         db = get_db()
 
-        #create table sql queries
         db.executescript("""
             CREATE TABLE IF NOT EXISTS status_lists (
                 id    INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,6 +42,7 @@ def init_db(app):
                 title          TEXT    NOT NULL,
                 description    TEXT,
                 deadline       TEXT,
+                status         TEXT    NOT NULL DEFAULT 'todo',
                 updated_at     TEXT DEFAULT CURRENT_TIMESTAMP,
                 created_at     TEXT DEFAULT CURRENT_TIMESTAMP
             );
@@ -53,14 +53,29 @@ def init_db(app):
                 title          TEXT    NOT NULL,
                 description    TEXT,
                 deadline       TEXT,
+                status         TEXT    NOT NULL DEFAULT 'todo',
                 updated_at     TEXT DEFAULT CURRENT_TIMESTAMP,
                 created_at     TEXT DEFAULT CURRENT_TIMESTAMP
             );
         """)
 
+        # Add status column to existing tables if it's missing (migration for old DBs)
+        for table in ('subtasks', 'subsubtasks'):
+            try:
+                db.execute(f"ALTER TABLE {table} ADD COLUMN status TEXT NOT NULL DEFAULT 'todo'")
+                db.commit()
+            except Exception:
+                pass  # column already exists
+
         # Seed the three fixed status columns if they don't exist yet
         existing = {row['title'] for row in db.execute("SELECT title FROM status_lists").fetchall()}
-        #any task must have a list_id. So, must pre-fill a row to status_list table if any status has 0 row
+
+        # Migrate 'pending' -> 'in-progress' if old seed was used
+        if 'pending' in existing:
+            db.execute("UPDATE status_lists SET title = 'in-progress' WHERE title = 'pending'")
+            existing.discard('pending')
+            existing.add('in-progress')
+
         for title in ('todo', 'in-progress', 'done'):
             if title not in existing:
                 db.execute("INSERT INTO status_lists (title) VALUES (?)", (title,))
