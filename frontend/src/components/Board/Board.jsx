@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   DndContext,
   closestCenter,
@@ -10,33 +10,21 @@ import Column from '../Column/Column'
 import './Board.css'
 
 const STATUSES = [
-  { id: 'todo',    title: 'To Do' },
-  { id: 'pending', title: 'In Progress' },
-  { id: 'done',    title: 'Done' },
-]
-
-// Temporary mock data — replace with API call later
-const MOCK_TASKS = [
-  {
-    task_id: 1,
-    task_title: 'Design the UI',
-    task_description: 'Wireframes and mockups',
-    task_deadline: '2025-03-10',
-    task_status: 'todo',
-    subtasks: [],
-  },
-  {
-    task_id: 2,
-    task_title: 'Set up Flask backend',
-    task_description: '',
-    task_deadline: '',
-    task_status: 'pending',
-    subtasks: [],
-  },
+  { id: 'todo',        title: 'To Do' },
+  { id: 'in-progress', title: 'In Progress' },
+  { id: 'done',        title: 'Done' },
 ]
 
 export default function Board() {
-  const [tasks, setTasks] = useState(MOCK_TASKS)
+  const [tasks, setTasks] = useState([])
+
+  // Load all tasks from the API on mount
+  useEffect(() => {
+    //call api/tasks endpoint
+    fetch('/api/tasks')
+      .then(res => res.json())
+      .then(data => setTasks(data)) // update the setTasks with fetched data
+  }, [])
 
   const sensors = useSensors(useSensor(PointerSensor))
 
@@ -69,30 +57,36 @@ export default function Board() {
   }
 
   // ── Task (level 1) handlers ────────────────────────────────────────────────
-  function handleUpdate(taskId, updates) {
+  async function handleUpdate(taskId, updates) {
+    
+    await fetch(`/api/tasks/${taskId}`,{
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updates),
+    })
+
     setTasks(prev =>
       prev.map(t => t.task_id === taskId ? { ...t, ...updates } : t)
     )
-    // TODO: PATCH /api/tasks/:taskId
   }
 
-  function handleDelete(taskId) {
+  async function handleDelete(taskId) {
     // include existing task which task_id is not equal to the target task_id 
     setTasks(prev => prev.filter(t => t.task_id !== taskId))
-    // TODO: DELETE /api/tasks/:taskId
+    await fetch(`/api/tasks/${taskId}`, { method: 'DELETE' })
   }
 
-  function handleAddSubtask(taskId) {
+  async function handleAddSubtask(taskId) {
     // new sub task information
-    const newSub = {
-      task_id: Date.now(),
-      parent_task_id: taskId,
-      task_title: 'New sub-task',
-      task_description: '',
-      task_deadline: '',
-      task_status: 'todo',
-      subsubtasks: [],
-    }
+
+    const res = await fetch(`/api/subtasks/${taskId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task_title: 'New sub-task', task_status: 'todo' }),
+  })
+
+  const newSub = await res.json() // wait for the api's return 
+
     // Iterate through every existig task; If a task id equals the target task's id, coppy the previous subtasks if exist, with the new subtask
     setTasks(prev =>
       prev.map(t =>
@@ -101,11 +95,18 @@ export default function Board() {
           : t
       )
     )
-    // TODO: POST /api/subtasks/:taskId
+    
   }
 
   // ── Subtask (level 2) handlers ─────────────────────────────────────────────
-  function handleUpdateSub(taskId, subId, updates) {
+  async function handleUpdateSub(taskId, subId, updates) {
+    // send PATCH API to backend 
+    const res = await fetch(`/api/subtasks/${subId}`,{
+      method : 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(updates)
+    })
+    
     // Iterate through existing tasks. For task id equals to the target task, copy the sub task's data and add the updates. 
     setTasks(prev =>
       prev.map(t =>
@@ -114,11 +115,12 @@ export default function Board() {
           : t
       )
     )
-    // TODO: PATCH /api/subtasks/:subId
+   
   }
 
-  function handleDeleteSub(taskId, subId) {
+  async function handleDeleteSub(taskId, subId) {
     // Iterate through existing tasks and include in the subtasks list except the task that has the id equal to the target task_id 
+
     setTasks(prev =>
       prev.map(t =>
         t.task_id === taskId
@@ -126,18 +128,22 @@ export default function Board() {
           : t
       )
     )
-    // TODO: DELETE /api/subtasks/:subId
+
+    await fetch(`api/subtasks/${subId}`, 
+      { method : 'DELETE' })
+
   }
 
-  function handleAddSubSubtask(taskId, subId) {
-    const newSubSub = {
-      task_id: Date.now(),
-      parent_task_id: subId,
-      task_title: 'New sub-sub-task',
-      task_description: '',
-      task_deadline: '',
-      task_status: 'todo',
-    }
+  async function handleAddSubSubtask(taskId, subId) {
+
+    const res = await fetch(`api/subsubtasks/${subId}`, {
+      method: "POST", 
+      headers: {"Content-Type" : "application/json"},
+      "body": {"task_title": 'New sub-sub task', "task_status": 'todo'}
+    })
+    
+    const newSubSub = await res.json() 
+
     setTasks(prev =>
       prev.map(t =>
         t.task_id === taskId
@@ -152,11 +158,18 @@ export default function Board() {
           : t
       )
     )
-    // TODO: POST /api/subsubtasks/:subId
+   
   }
 
   // ── Sub-sub-task (level 3) handlers ───────────────────────────────────────
-  function handleUpdateSubSub(taskId, subId, subsubId, updates) {
+  async function handleUpdateSubSub(taskId, subId, subsubId, updates) {
+
+    await fetch(`/api/subsubtasks/${subsubId}`, {
+      method: "PATCH",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(updates)
+    })
+
     setTasks(prev =>
       prev.map(t =>
         t.task_id === taskId
@@ -176,10 +189,10 @@ export default function Board() {
           : t
       )
     )
-    // TODO: PATCH /api/subsubtasks/:subsubId
+    
   }
 
-  function handleDeleteSubSub(taskId, subId, subsubId) {
+  async function handleDeleteSubSub(taskId, subId, subsubId) {
     setTasks(prev =>
       prev.map(t =>
         t.task_id === taskId
@@ -194,21 +207,19 @@ export default function Board() {
           : t
       )
     )
-    // TODO: DELETE /api/subsubtasks/:subsubId
+    await fetch(`/api/subsubtasks/${subsubId}`, { method: 'DELETE' })
   }
 
   // ── Add a new top-level card ───────────────────────────────────────────────
-  function handleAddCard() {
-    const newTask = {
-      task_id: Date.now(),
-      task_title: 'New task',
-      task_description: '',
-      task_deadline: '',
-      task_status: 'todo',
-      subtasks: [],
-    }
+  async function handleAddCard() {
+    const res = await fetch('/api/tasks', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task_title: 'New task', task_status: 'todo' }),
+    })
+    const newTask = await res.json()
+    // Update Tasks with the added new task 
     setTasks(prev => [...prev, newTask])
-    // TODO: POST /api/tasks
   }
 
   const sharedHandlers = {
