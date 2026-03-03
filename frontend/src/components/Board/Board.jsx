@@ -29,7 +29,7 @@ export default function Board() {
   const sensors = useSensors(useSensor(PointerSensor))
 
   // ── Drag & drop ────────────────────────────────────────────────────────────
-  function handleDragDrop(event) {
+  async function handleDragDrop(event) {
     const { active, over } = event
     if (!over) return
 
@@ -37,13 +37,26 @@ export default function Board() {
     const overId = over.id
     const columnIds = STATUSES.map(s => s.id)
 
+    //update the db
+    await fetch(`/api/tasks/${draggedId}`, {   
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ task_status: overId }),
+  })
+
+    
     // Dropped onto a column → move to that status
     if (columnIds.includes(overId)) {
       setTasks(prev =>
         prev.map(t => t.task_id === draggedId ? { ...t, task_status: overId } : t)
       )
+
+
+    
       return
     }
+
+ 
 
     // Dropped onto another card → move to that card's column
     const overTask = tasks.find(t => t.task_id === overId)
@@ -129,17 +142,17 @@ export default function Board() {
       )
     )
 
-    await fetch(`api/subtasks/${subId}`, 
+    await fetch(`/api/subtasks/${subId}`, 
       { method : 'DELETE' })
 
   }
 
   async function handleAddSubSubtask(taskId, subId) {
 
-    const res = await fetch(`api/subsubtasks/${subId}`, {
+    const res = await fetch(`/api/subsubtasks/${subId}`, {
       method: "POST", 
       headers: {"Content-Type" : "application/json"},
-      "body": {"task_title": 'New sub-sub task', "task_status": 'todo'}
+      body: JSON.stringify({"task_title": 'New sub-sub task', "task_status": 'todo'})
     })
     
     const newSubSub = await res.json() 

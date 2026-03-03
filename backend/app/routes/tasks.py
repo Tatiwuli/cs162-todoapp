@@ -60,6 +60,7 @@ def get_tasks():
     return jsonify(result)
 
 
+
 @tasks_bp.route('/api/tasks', methods=['POST'])
 def create_task():
     """Create a new top-level task and return it."""
