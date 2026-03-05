@@ -8,8 +8,6 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    # Allow frontend dev server to talk to this API.
-   
     CORS(app, origins=['http://localhost:5173'])
 
     app.teardown_appcontext(close_db)
@@ -20,7 +18,6 @@ def create_app():
     from app.routes.subtasks import subtasks_bp
     from app.routes.subsubtasks import subsubtasks_bp
     from app.routes.auth import auth_bp
-
     app.register_blueprint(tasks_bp)
     app.register_blueprint(subtasks_bp)
     app.register_blueprint(subsubtasks_bp)

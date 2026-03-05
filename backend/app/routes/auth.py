@@ -1,10 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
-
 from app.extensions import get_db
 
-
-auth_bp = Blueprint('auth_bp', __name__)
 
 
 @auth_bp.route('/api/signup', methods=['POST'])
@@ -14,7 +11,7 @@ def signup():
     Expected JSON: { "name": str, "email": str, "password": str }
     """
     db = get_db()
-    data = request.get_json() or {}
+    data = request.get_json() or {} 
 
     name = (data.get('name') or '').strip()
     email = (data.get('email') or '').strip().lower()
@@ -23,21 +20,19 @@ def signup():
     if not name or not email or not password:
         return jsonify({'error': 'name, email, and password are required'}), 400
 
-    # Enforce unique email
-    existing = db.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
-    if existing:
-        return jsonify({'error': 'Email is already registered'}), 400
+    #Enforce unique email per user
+    existing = db.execute("SELECT id FROM users where email = ?", (email, )).fetchone() #sql process parameters as a sequence ( tuple/ list). therrefore, we did (email, )
+
+    if existing  : 
+        return jsonify({'error': 'Email is already registered. Please login'}), 400
 
     password_hash = generate_password_hash(password)
 
-    cur = db.execute(
-        "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-        (name, email, password_hash),
-    )
+    cur = db.execute("INSERT INTO users (name, email, password_hash) VALUES (? ? ?)", (name, email, password_hash),)
     db.commit()
 
     user_id = cur.lastrowid
-    # Log the user in immediately after signup
+    #login user immediatedly after signup 
     session['user_id'] = user_id
 
     return jsonify({
@@ -47,9 +42,9 @@ def signup():
     }), 201
 
 
-@auth_bp.route('/api/login', methods=['POST'])
+@auth_bp.route('/api/login', methods = ['POST'])
 def login():
-    """
+     """
     Log an existing user in.
     Expected JSON: { "email": str, "password": str }
     """
@@ -113,4 +108,9 @@ def me():
         'email': user['email'],
         'created_at': user['created_at'],
     })
+
+
+    
+
+
 
