@@ -1,9 +1,14 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 
 const AuthContext =  createContext(null)
 
 export function AuthProvider({children}) {
+
+    const navigate = useNavigate()
+
+    // user holds current logged in user
     const [user , setUser] = useState(null)
     const [loading, setLoading] = useState(true )
 
@@ -15,7 +20,7 @@ export function AuthProvider({children}) {
         async function loadMe(){
             try {
                 const res = await fetch("/api/me", {
-                    credentials : 'include',
+                    credentials : 'include', // always send cookies in the request 
                 })
 
                 if (res.ok) { // if res return a 2xx code 
@@ -30,10 +35,10 @@ export function AuthProvider({children}) {
         }
         // call function immediately 
         loadMe()
-    }, [])
+    }, []) // run it once when app mounts 
 
 
-    async function signup({name, email, password}){
+    async function signup(name, email, password){
 
         const res = await fetch('/api/signup', {
         method: 'POST',
@@ -49,9 +54,46 @@ export function AuthProvider({children}) {
         }
         const data = await res.json()
         setUser(data)
+        navigate('/')
         return data 
     }
 
+        async function login(email, password) {
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ email, password }),
+        })
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}))
+            throw new Error(err.error || 'Login failed')
+        }
+        const data = await res.json()
+        setUser(data)
+        navigate('/')
+    }
 
 
+    
+    async function logout() {
+        await fetch('/api/logout', { method: 'POST', credentials: 'include' })
+        setUser(null)
+        navigate('/login')
+    }
+
+
+    return (
+        <AuthContext.Provider value = {{user, loading, login, signup, logout}}>
+            {children}
+        </AuthContext.Provider>
+    )
+
+
+
+}
+
+// this make it easier to use the auth context: we just import useAuth.
+export function useAuth(){
+    return useContext(AuthContext)
 }

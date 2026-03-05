@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.extensions import get_db
 
-
+auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/api/signup', methods=['POST'])
 def signup():
@@ -28,7 +28,7 @@ def signup():
 
     password_hash = generate_password_hash(password)
 
-    cur = db.execute("INSERT INTO users (name, email, password_hash) VALUES (? ? ?)", (name, email, password_hash),)
+    cur = db.execute("INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)", (name, email, password_hash),)
     db.commit()
 
     user_id = cur.lastrowid
@@ -44,7 +44,7 @@ def signup():
 
 @auth_bp.route('/api/login', methods = ['POST'])
 def login():
-     """
+    """
     Log an existing user in.
     Expected JSON: { "email": str, "password": str }
     """
