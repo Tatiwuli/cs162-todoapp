@@ -3,6 +3,9 @@
 A full-stack Kanban-style task management app with user authentication. Users can create, organize, and manage tasks across three status columns (To Do, In Progress, Done), with drag-and-drop support and nested subtasks.
 
 ## Github repository link:
+[Repository](https://github.com/Tatiwuli/cs162-todoapp)
+
+
 ---
 
 ## Tech Stack
