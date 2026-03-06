@@ -10,9 +10,9 @@ import Column from '../Column/Column'
 import './Board.css'
 
 const STATUSES = [
-  { id: 'todo',        title: 'To Do' },
-  { id: 'in-progress', title: 'In Progress' },
-  { id: 'done',        title: 'Done' },
+  { id: 'todo',        title: 'To Do',       color: '#c8a96e' },
+  { id: 'in-progress', title: 'In Progress', color: '#3b82f6' },
+  { id: 'done',        title: 'Done',        color: '#22c55e' },
 ]
 
 export default function Board() {
@@ -256,6 +256,7 @@ export default function Board() {
               key={status.id}
               id={status.id}
               title={status.title}
+              color={status.color}
             //   Include the tasks, which status == to status id of current column
               tasks={tasks.filter(t => t.task_status === status.id)}
               {...sharedHandlers}

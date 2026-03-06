@@ -24,7 +24,7 @@ def signup():
     existing = db.execute("SELECT id FROM users where email = ?", (email, )).fetchone() #sql process parameters as a sequence ( tuple/ list). therrefore, we did (email, )
 
     if existing  : 
-        return jsonify({'error': 'Email is already registered. Please login'}), 400
+        return jsonify({'error': 'Email already exists. Please login or try another email'}), 400
 
     password_hash = generate_password_hash(password)
 

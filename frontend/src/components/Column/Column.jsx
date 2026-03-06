@@ -4,13 +4,13 @@ import Card from '../Card/Card'
 import './Column.css'
 
 
-export default function Column({ id, title, tasks, onUpdate, onDelete, onAddSubtask, onUpdateSub, onDeleteSub, onAddSubSubtask, onUpdateSubSub, onDeleteSubSub }) {
+export default function Column({ id, title, color, tasks, onUpdate, onDelete, onAddSubtask, onUpdateSub, onDeleteSub, onAddSubSubtask, onUpdateSubSub, onDeleteSubSub }) {
   const { setNodeRef } = useDroppable({ id })
 
   return (
-    <div className="column">
+    <div className="column" style={{ borderTop: `4px solid ${color}` }}>
       <h2 className="column-title">
-        {title}
+        <span style={{ color }}>{title}</span>
         <span className="column-count">{tasks.length}</span>
       </h2>
       <div ref={setNodeRef} className="column-body">

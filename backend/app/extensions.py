@@ -29,6 +29,7 @@ def init_db(app):
             CREATE TABLE IF NOT EXISTS tasks (
                 id          INTEGER PRIMARY KEY AUTOINCREMENT,
                 list_id     INTEGER NOT NULL REFERENCES status_lists(id),
+                user_id     INTEGER REFERENCES users(id),
                 title       TEXT    NOT NULL,
                 description TEXT,
                 deadline    TEXT,
@@ -74,6 +75,13 @@ def init_db(app):
                 db.commit()
             except Exception:
                 pass  # column already exists
+
+        # Add user_id to tasks if missing (migration for old DBs)
+        try:
+            db.execute("ALTER TABLE tasks ADD COLUMN user_id INTEGER REFERENCES users(id)")
+            db.commit()
+        except Exception:
+            pass  # column already exists
 
         # Seed the three fixed status columns if they don't exist yet
         existing = {row['title'] for row in db.execute("SELECT title FROM status_lists").fetchall()}

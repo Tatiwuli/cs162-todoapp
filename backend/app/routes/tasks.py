@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 from app.extensions import get_db
 
 tasks_bp = Blueprint('tasks', __name__)
@@ -7,10 +7,15 @@ tasks_bp = Blueprint('tasks', __name__)
 @tasks_bp.route('/api/tasks', methods=['GET'])
 def get_tasks():
     """Return all tasks with their nested subtasks and sub-subtasks."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
     db = get_db()
     tasks = db.execute(
         "SELECT t.id, sl.title AS task_status, t.title, t.description, t.deadline "
-        "FROM tasks t JOIN status_lists sl ON t.list_id = sl.id ORDER BY t.id"
+        "FROM tasks t JOIN status_lists sl ON t.list_id = sl.id "
+        "WHERE t.user_id = ? ORDER BY t.id",
+        (user_id,)
     ).fetchall()
 
     result = []
@@ -64,6 +69,9 @@ def get_tasks():
 @tasks_bp.route('/api/tasks', methods=['POST'])
 def create_task():
     """Create a new top-level task and return it."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
     db = get_db()
     data = request.get_json() or {}
     title = data.get('task_title', 'New task')
@@ -77,8 +85,8 @@ def create_task():
         return jsonify({'error': f'Unknown status: {status}'}), 400
 
     cur = db.execute(
-        "INSERT INTO tasks (list_id, title, description, deadline) VALUES (?, ?, ?, ?)",
-        (list_row['id'], title, description or None, deadline or None)
+        "INSERT INTO tasks (list_id, user_id, title, description, deadline) VALUES (?, ?, ?, ?, ?)",
+        (list_row['id'], user_id, title, description or None, deadline or None)
     )
     db.commit()
 
@@ -95,8 +103,11 @@ def create_task():
 @tasks_bp.route('/api/tasks/<int:task_id>', methods=['PATCH'])
 def update_task(task_id):
     """Update any subset of a task's fields (title, description, deadline, status)."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
     db = get_db()
-    if not db.execute("SELECT id FROM tasks WHERE id = ?", (task_id,)).fetchone():
+    if not db.execute("SELECT id FROM tasks WHERE id = ? AND user_id = ?", (task_id, user_id)).fetchone():
         return jsonify({'error': 'Task not found'}), 404
 
     data = request.get_json() or {}
@@ -134,7 +145,12 @@ def update_task(task_id):
 @tasks_bp.route('/api/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
     """Delete a task and cascade-remove all its subtasks and sub-subtasks."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Not authenticated'}), 401
     db = get_db()
+    if not db.execute("SELECT id FROM tasks WHERE id = ? AND user_id = ?", (task_id, user_id)).fetchone():
+        return jsonify({'error': 'Task not found'}), 404
     # Manually cascade: delete subsubtasks → subtasks → task
 
     #[subtask_id,]
